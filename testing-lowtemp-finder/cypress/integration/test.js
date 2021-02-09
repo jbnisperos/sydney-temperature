@@ -1,7 +1,7 @@
 import { temperatureSpread } from "../support/pageObject"
 
 
-describe('Test projection tool calculations', () => {
+describe('Open UI', () => {
 
   beforeEach('open application', () => {
       cy.openHomePage()
