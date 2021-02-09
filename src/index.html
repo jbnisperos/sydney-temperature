@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Read CSV</title>
+
+  <script type="text/javascript" src="papaparse.min.js"></script>
+</head>
+<body>
+  <input type="file" id="csv-upload" accept=".csv">
+  <button id="button-upload-csv">Read CSV</button>
+  <table id="table-data"></table>
+  
+  <script type="text/javascript"> 
+  
+let button_upload = document.getElementById('button-upload-csv').addEventListener('click',()=>{
+        
+        Papa.parse(document.getElementById('csv-upload').files[0],{
+            download: true,
+            header: true,
+            skipEmptyLines: 'greedy',
+            dynamicTyping: true,
+            comments:"Monthly",
+            complete: function(results){
+              console.log(results)
+              
+              var arraytransformNumber = []
+              var difference = []
+              var subtract = 0
+    
+              for (a=0;a<results.data.length;a++)
+              {
+                
+                if (isNaN(results.data[a]["Mean maximum temperature (Degrees C)"]) && isNaN(results.data[a]["Mean minimum temperature (Degrees C)"]))
+                {
+                  
+                  var str1 = results.data[a]["Mean minimum temperature (Degrees C)"]
+                  number1=parseFloat(str1.replace(/\*/g,""))
+                  var str2 = results.data[a]["Mean maximum temperature (Degrees C)"]
+                  number2=parseFloat(str2.replace(/\*/g,""))
+    
+                  if (isNaN(number1) && isNaN(number2))
+                  {
+                    arraytransformNumber[a] = {"Month":results.data[a].Month,"Mean_maximum":NaN,"Mean_minimum":NaN,"Temp_diff":NaN}
+                  }
+                  else{
+                    subtract = (number2-number1)
+                     difference = +subtract.toFixed(2)
+                    arraytransformNumber[a] = {"Month": results.data[a].Month,"Mean_maximum": number2,"Mean_minimum": number1,"Temp_diff":difference}
+                  }
+                  
+                }
+                else if (isNaN(results.data[a]["Mean maximum temperature (Degrees C)"]))
+                {
+                  
+                  var str = results.data[a]["Mean maximum temperature (Degrees C)"]
+                  number=parseFloat(str.replace(/\*/g,""))
+    
+                  if (isNaN(number))
+                  {
+                    arraytransformNumber[a] = {"Month":results.data[a].Month,"Mean_maximum":NaN,"Mean_minimum":results.data[a]["Mean minimum temperature (Degrees C)"],"Temp_diff":NaN}
+                  }
+                  else{
+                    subtract = (number-(results.data[a]["Mean minimum temperature (Degrees C)"]))
+                     difference = +subtract.toFixed(2)
+                     arraytransformNumber[a] = {"Month":results.data[a].Month,"Mean_maximum":number,"Mean_minimum":results.data[a]["Mean minimum temperature (Degrees C)"],"Temp_diff":difference}
+                  }
+                }
+                else if (isNaN(results.data[a]["Mean minimum temperature (Degrees C)"]))
+                {
+                  
+                  var str = results.data[a]["Mean minimum temperature (Degrees C)"]
+                  number=parseFloat(str.replace(/\*/g,""))
+    
+                  if (isNaN(number))
+                  {
+                    arraytransformNumber[a] = {"Month":results.data[a].Month,"Mean_maximum":results.data[a]["Mean maximum temperature (Degrees C)"],"Mean_minimum":NaN,"Temp_diff":NaN}
+                  }
+                  else{
+                    subtract = ((results.data[a]["Mean maximum temperature (Degrees C)"])-number)
+                    difference = +subtract.toFixed(2)
+                    arraytransformNumber[a] = {"Month":results.data[a].Month,"Mean_maximum":results.data[a]["Mean maximum temperature (Degrees C)"],"Mean_minimum":number,"Temp_diff":difference}
+                  }
+                }
+                
+                
+                else if(results.data[a]["Mean minimum temperature (Degrees C)"]==null && results.data[a]["Mean maximum temperature (Degrees C)"]==null){
+                  arraytransformNumber[a]  = {"Month":results.data[a].Month,"Mean_maximum":NaN,"Mean_minimum":NaN,"Temp_diff":NaN}
+                  
+                }
+                else if(results.data[a]["Mean minimum temperature (Degrees C)"]==null){
+                  arraytransformNumber[a]  = {"Month":results.data[a].Month,"Mean_maximum":results.data[a]["Mean maximum temperature (Degrees C)"],"Mean_minimum":0,"Temp_diff":NaN}
+                  
+                }
+                else
+                {
+                  subtract = ((results.data[a]["Mean maximum temperature (Degrees C)"])-(results.data[a]["Mean minimum temperature (Degrees C)"]))
+                  difference = +subtract.toFixed(2)
+                  arraytransformNumber[a] = {"Month":results.data[a].Month,"Mean_maximum":results.data[a]["Mean maximum temperature (Degrees C)"],"Mean_minimum":results.data[a]["Mean minimum temperature (Degrees C)"],"Temp_diff":difference}
+                 
+              }
+    
+              }
+    
+            console.log(arraytransformNumber)
+    
+             var removenan =[]
+              var i = 0
+            for (b=0;b<arraytransformNumber.length;b++)
+            {
+              
+              if(!isNaN(arraytransformNumber[b].Temp_diff))
+              {
+                removenan[i] ={"Month":arraytransformNumber[b].Month,"FinalDiff":arraytransformNumber[b].Temp_diff}
+                i++
+               
+            }
+            
+            }
+              
+              console.log(removenan)
+              var lowesttemp = []
+               var findlowest = removenan[0].FinalDiff
+               var lowestmonth = []
+               var i = 1
+               var e = 0
+              for (d=0;d<removenan.length;d++)
+              {
+               
+                if (findlowest >removenan[d].FinalDiff)
+                {
+                    lowestmonth = []
+                    lowestmonth[e] = {"Month":removenan[d].Month}
+                    findlowest = removenan[d].FinalDiff
+                    console.log(lowestmonth)
+                }
+                else if(findlowest==removenan[d].FinalDiff)
+                { 
+    
+                  findlowest = removenan[d].FinalDiff
+                  lowestmonth[i] = {"Month":removenan[d].Month}
+                  console.log(lowestmonth)
+              }
+              i++
+              }
+              console.log(lowestmonth)
+              var lowestmonth = lowestmonth.filter(function(el) { return el; });
+              
+              var finalstring =[]
+              // if(lowestmonth.length==1)
+              // {
+              //   finalstring [0] = lowestmonth[0].Month.toString()
+                
+              // }
+              
+              // else{
+                for (j=0;j<lowestmonth.length;j++)
+              {
+                finalstring [j]= lowestmonth[j].Month.toString()
+              
+              }
+              
+              console.log(lowestmonth)
+              // for (d=0;d<arraytransformNumber.length;d++)
+              // {
+              //   if (lowesttemp==arraytransformNumber[d].Temp_diff)
+              //   {
+              //     lowesttemp = {"Month":arraytransformNumber[d].Month,"LowestTemp": arraytransformNumber[d].Temp_diff}
+    
+              //   }
+              //   else
+              //   {
+              //    return
+              //   }
+    
+              // }
+    
+     
+             document.getElementById('table-data').innerHTML = "The Lowest temperature spread this year is in the month of " +finalstring +" with temperature spread of: " +findlowest+" Degrees"
+            
+            }
+        })
+    
+    })
+    
+  </script>
+
+</body>
+</html>
+
