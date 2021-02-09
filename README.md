@@ -15,4 +15,6 @@ The program is using Papaparse CSV library for parsing the CSV file
    -  `http-server`  
    
 4. Go to testing-lowtemp-finder/cypress.json and replace the baseURL with url from the 'http-server', for example: http://127.0.0.1:8080/
-5. To run test on command line, go to the testing-lowtemp-finder on
+5. To run the test on command line, go to the testing-lowtemp-finder on terminal and execute: npx cypress run
+6. To open cypress and run the test, go to the testing-lowtemp-finder on terminal and execute: npx cypress open
+
